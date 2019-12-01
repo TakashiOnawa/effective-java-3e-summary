@@ -194,6 +194,51 @@ public int compareTo(MyClass o) {
 * public final ついたフィールドならあり。正し、公開する型には注意。配列などは代入はできなくとも要素の追加や削除はできてしまうため public にするのはよろしくない。アクセサメソッドで
 * パッケージプライベートか private なネストしたクラスなら公開することが望ましい場合があると書いてあるが、とにかく、<b>いつどこで誰が書き換えるかが分からなくなってしまうような公開の方法はしないこと</b>。
 
+## 項目17 可変性を最小限にする
+* 不変オブジェクトを利用する。作られた時から状態が変わらない。安全。
+* **ValueObject**のことですね。
+* 状態を変更するメソッドを持たせず、クラスを拡張できないようにし（サブクラスを作らせないように final クラスにする）、すべてのフィールドを private final にし、変更可能なオブジェクトを内部に持つ場合はそのオブジェクトを外部からを取得できないようにする。（コピーして返すなら可。）
+* サブクラスをっ作らせないようにするためには、final クラスにする他 private コンストラクタと static なファクトリメソッドを作ることでも実現できる。筆者はどちらかというと後者を進めている感じがする。
+* すべてのフィールドを final にするとあるが必ずそうでなくてもよい。**要は、外部からの操作により状態が変更できなければよい。**例えば、getHashCode などは初めて呼ばれたときにフィールドにキャッシュするようにしてもよい。
+
+## 項目18 継承よりもコンポジションを選ぶ
+* サブクラスはスーパークラスの詳細を知らなければ作れないし、スーパークラスの変更されるとサブクラスに影響する。サブクラスとスーパークラスは一緒に成長して行かなければならない。カプセル化を破っていることになる。
+* ラッパークラスを作るとラップされたクラスにメソッドが追加されたとしてもラッパークラスには影響しない。
+```java
+// こうじゃない
+public class MyHashSet<E> extends HashSet<E> {
+    @Override
+    public void add(E e) {
+        // サブクラス独自処理
+        ・・・
+        super.add(e);
+    }
+
+    @Override
+    public void clear() {
+        // サブクラス独自処理
+        ・・・
+        super.clear();
+    }
+    ・・・
+}
+
+// こうする
+// HasSet のインターフェースである Set を実装した転送クラスを作る。
+public class ForwardingSet<E> implements Set<E> {
+    // Set をラップする。
+    private final Set<E> innerSet;
+    public ForwardingSet(Set<E> s) {
+        innerSet = s;
+    }
+
+    // 内部に保持する Set に処理を委譲する。
+    public void add(E e) { innerSet.add(e); }
+    public void clear() {innerSet.clear(); }
+    ・・・
+}
+```
+
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
 * [【Effective Java】各項目のまとめ](https://www.thekingsmuseum.info/entry/2016/12/17/174236)
