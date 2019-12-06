@@ -322,7 +322,89 @@ public abstract AbstractYYYClass implements MyInterface {
 
 ## 項目24 非 static のメンバークラスよりも static のメンバークラスを選ぶ
 * メンバークラスというのはクラス内に記述されたクラスのこと。（ネストしたクラスという）
-* 
+* ネストしたクラスには、**static のメンバークラス**、**非 static のメンバークラス**、**無名クラス**、**ローカルクラス**、がある。
+* static のメンバークラスと非 static のメンバークラスならば、static のメンバークラスを使う。（非 static のメンバークラスのインスタンスは、エンクロージングクラスの参照を持つため、使い方間違えると GC されない恐れがある。）
+* ローカルクラスは、メソッド内にクラスを定義できる。
+* 無名クラスは、
+
+```java
+// エンクロージングクラス
+public class MyClass {
+    private int myClassField;
+    public MyClass(int field) {
+        myClassField = field;
+    }
+
+    // 非 static のメンバークラス
+    public class NonStaticClass {
+        private int nonStaticClasField;
+        public NonStaticClass(int field) {
+            nonStaticClasField = field;
+        }
+        int getMyClassField() {
+            // エンクロージングクラスのフィールドにアクセスできる。
+            return MyClass.this.myClassField;
+        }
+    }
+
+    // static のメンバークラス
+    // 基本的にはこっちを使うこと
+    public static class StaticClass {
+        private int staticClassField;
+        public StaticClass(int field) {
+            staticClassField = field;
+        }
+    }
+}
+
+/** 使い方 **/
+// 非 static なメンバークラスはエンクロージングクラスのインスタンスを生成しなければ利用できない。
+MyClass myClass = new MyClass(1);
+MyClass.NonStaticClass nonStaticClass = myClass.new NonStaticClass(2);
+// ↑ nonStaticClass インスタンスは myClass インスタンスへの参照を持つ。
+
+// static なメンバークラスはエンクロージングクラスのインスタンスがなくても生成できる。
+MyClass.StaticClass staticClass = new MyClass.StaticClass(3);
+```
+
+```java
+// ローカルクラスの使い方
+public void MyMethod() {
+    // ローカルクラス
+    class LocalClass {
+        // 何かしらのフィールドやメソッド
+    }
+
+    LocalClass localClass = new LocalClass();
+}
+```
+
+```java
+// 無名クラスの使い方
+public class MyClass {
+    public NoNameClass myMethod() {
+        int field = 1;
+        return new NoNameClass() {
+            @Override
+            public int getField() {
+                return field;
+            }
+        };
+    }
+}
+
+public class NoNameClass {
+    public int getField() {
+        return -1;
+    }
+}
+
+/** 使い方 **/
+MyClass myClass = new MyClass();
+NoNameClass noNameClass = myClass.myMethod();
+int field = noNameClass.getField(); // オーバーライドされたメソッドが利用される。
+```
+
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
