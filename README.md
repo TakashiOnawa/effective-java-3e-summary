@@ -456,7 +456,37 @@ private static int myMethod(List<? extends Number> a, List<? extends Number> b) 
 |型トークン|String.class|
 
 ## 項目27 無検査警告を取り除く
+* 無検査警告は必ず取り除く
+* 安全である場合のみアノテーションで除外する
+```java
+@SuppressWarnings("unchecked")
+// クラスを対象にしたり、メソッドを対象にしたり、メソッド内の処理を対象にしたりできる。
+// return を対象にすることはできない。
+```
 
+## 項目28 配列よりもリストを選ぶ
+* 配列は共変であり、ジェネリックスは不変である。ジェネリックスの方が安全。
+```java
+// 共変：これはできる。（Long は Object の派生なので）
+// C# ならコンパイルエラーなのに。。。
+Object[] objectArray = new Long[1];
+// ↓ コンパイルエラー起きないけど実行時にエラーになる。
+objectArray[0] = "aaa"; 
+
+// 不変：これはコンパイルエラー。こっちのほうが安全。
+List<Object> objectList = new ArrayList<Long>();
+```
+
+* ジェネリック配列が生成できない
+```java
+// これができない。
+E[] test = new E[1];
+// こうするとよい
+List<E> test = new List<E>();
+```
+
+## 項目29 ジェネリック型を使う
+* todo
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
