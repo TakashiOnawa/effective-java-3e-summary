@@ -370,7 +370,7 @@ MyClass.StaticClass staticClass = new MyClass.StaticClass(3);
 ```java
 // ローカルクラスの使い方
 public void MyMethod() {
-    // ローカルクラス
+    // ローカルクラス（メソッド内でクラスの定義ができる）
     class LocalClass {
         // 何かしらのフィールドやメソッド
     }
@@ -384,7 +384,8 @@ public void MyMethod() {
 public class MyClass {
     public NoNameClass myMethod() {
         int field = 1;
-        return new NoNameClass() {
+        // クラスを作ることなくインタフェース実装できる（インタフェースだけでなく通常のクラスでも良い。）
+        return new NoNameInterface() {
             @Override
             public int getField() {
                 return field;
@@ -393,17 +394,68 @@ public class MyClass {
     }
 }
 
-public class NoNameClass {
-    public int getField() {
-        return -1;
-    }
+public interface NoNameInterface {
+    int getField();
 }
 
 /** 使い方 **/
 MyClass myClass = new MyClass();
-NoNameClass noNameClass = myClass.myMethod();
-int field = noNameClass.getField(); // オーバーライドされたメソッドが利用される。
+NoNameInterface noNameClass = myClass.myMethod();
+int field = noNameClass.getField();
 ```
+
+## ソースファイルを単一のトップレベルのクラスに限定する
+* 1 ファイル 1 クラスにしなさい、ということかな？
+* そもそも Java では 1 ファイル複数クラスってできないと思ってた。
+
+# ジェネリックス
+## 項目26 原型を使わない
+* 原型型を使わずにジェネリックス型を使う。
+* 例えば、List という原型を使うのではなく、List<String> というパラメータ化された型を使う。
+
+```java
+// 原型を使うと
+List list = new ArrayList();
+// 文字列とか
+list.add("testString");
+// 数値とか
+list.add(1);
+// なんでも入れられてしまうため、取り出すときに適切にキャストしないとエラーになってしまう
+
+// ジェネリックス型を使用すると
+List<String> list = new ArrayList<String>();
+// 宣言した型のみ追加できる
+list.add("testString");
+list.add(1); // ← コンパイルエラー
+// よって、安全である
+```
+
+```java
+// 型が指定できない場合は、
+// 原型ではなく
+private static int myMethod(List a, List b) {...}
+// 非境界ワイルドカード型を使う
+private static int myMethod(List<?> a, List<?> b) {...}
+// これだとなんでも入れられてしまうから、ある程度制限したい場合は
+// 境界ワイルドカード型を使う
+private static int myMethod(List<? extends Number> a, List<? extends Number> b) {...}
+```
+
+|用語|例|
+|---|---|
+|パラメータ化された型|List\<String\>|
+|実型パラメータ|String|
+|ジェネリック型|List\<E\>|
+|仮型パラメータ|E|
+|非境界ワイルドカード型|List\<?\>|
+|原型|List|
+|境界型パラメータ|\<E extends Number\>|
+|再起型境界|\<T extends Comparable\<T\>\>|
+|境界ワイルドカード型|List\<? extends Number\>|
+|ジェネリックメソッド|static \<E\> List\<E\> asLIst(E[] a)|
+|型トークン|String.class|
+
+## 項目27 無検査警告を取り除く
 
 
 # 参考
