@@ -589,14 +589,46 @@ stack.popAll(popList);
 ```
 
 ## 項目32 ジェネリクスと可変長引数を注意して組み合わせる
-* 可変長パラメータを持つメソッドを作るなら、配列は使うな、ジェネリック型を使え。そしてメソッドには @SafeVarargs を付けろ。
+* 可変長パラメータを持つメソッドを作るなら、配列は使うな、ジェネリック型を使え。そのうえで可変長パラメータを持つメソッドには @SafeVarargs を付けろ。
 * そして、そもそも可変長パラメータは使わず List を渡せ。
 という理解でよいだろうか。。。
- 
-```JAVA
 
+```Java
+// こんな感じでジェネリクス型にする。
+@SafeVarargs // ← 安全な可変長パラメータを持つメソッドにはこれを付ける。
+static <T> List<T> flatten(List<? extends T>... lists) {
+    List<T> result = ne ArryaList<>();
+    for (List<? extends T> list : lists) {
+        result.addAll(list);
+    }
+    return result;
+}
 ```
 
+## 項目33 型安全な異種コンテナを検討する
+* クラスをキーにしたコンテナ（中に Map を持つクラス）を作ると、異なる型を一つのクラスに格納できる。
+```Java
+public class Favorites {
+    privater Map<Class<?>, Object> favorites = new HashMap<>();
+
+    public <T> putFavorite(Class<T> type, T instance) {
+        favorites.put(Objects.requireNonNull(type), instance);
+    }
+
+    public <T> T getFavorite(Class<T> type) {
+        return type.cast(favorites.get(type));
+    }
+}
+
+public static void main(String[] args) {
+    Favorites f = new Favorites();
+    f.putFavorite(String.class, "Java");
+    f.putFavorite(Integer.class, new Integer(1));
+    f.putFavorite(Class.class, Favorites.class);
+    String favoriteString = f.getFavorite(String.class);
+    System.out.pringf("%s", favoriteString); // ← Java
+}
+```
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
