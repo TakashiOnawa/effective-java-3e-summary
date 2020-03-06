@@ -486,7 +486,107 @@ List<E> test = new List<E>();
 ```
 
 ## 項目29 ジェネリック型を使う
-* todo
+```java
+// こうするよりも
+public class Stack {
+    public void push(Object e) {
+        ...
+    }
+    public Object pop() {
+        ...
+    }
+}
+
+// ジェネリッククラスを使って作る。
+public class Stack<E> {
+    public void push(E e) {
+        ...
+    }
+    public E pop() {
+        ...
+    }
+}
+```
+* ジェネリック型にはプリミティブ型の指定はできない。（int, boolean など。）
+* ジェネリック型の中身の実装はパフォーマンスを考慮したうえで配列にすることもある。（無検査警告は使う側には影響ないため @SuppressWarnings をつけて OK。）
+
+## ジェネリックメソッドを使う
+```java
+// こうするよりも
+public static Set union(Set s1, Set s2) {
+    ...
+}
+
+// ジェネリックメソッドを使って作る。
+public static <E> Set union(Set<E> s1, Set<E> s2) {
+    ...
+}
+```
+* ジェネリック・シングルトン・ファクトリ、再起型境界とかの記述もあるけど、置いておく。m(__)m
+
+## 項目31 API の柔軟性向上のために境界ワイルドカードを使う
+* ジェネリックスは不変であるため、少々使いづらい場合がある。
+* そんな時は境界ワイルドカード型を利用するとよい。
+
+```java
+public class Stack<E> {
+    public void push(E e);
+    public void pushAll(Iterable<E> src);
+    public void popAll(Iterable<E> dst);
+}
+
+Stack<Number> stack = new Stack<>();
+Iterable<Integer> pushList = new ArrayList<>();
+Iterable<Integer> popList = new ArrayList<>();
+stack.pushAll(list);
+// ↑ Integer は Number を継承しているがコンパイルエラーになってしまう。
+stack.popAll(popList);
+// ↑ これも同じようにコンパイルエラーとなる。
+
+// なぜならジェネリックは不変であるため。
+
+// 境界ワイルドカード型を使用するとよい。
+public class Stack<E> {
+    public void push(E e);
+    public void pushAll(Iterable<? extends E> src);
+    public void popAll(Iterable<? super E> dst);
+}
+```
+
+### PECS（Produser-Extends, Consumer-Super）、Get&Put 原則
+* extends と super の使い分けの原則。
+* パラメータがプロデューサ（生産者）ならば extends を利用する。
+* パラメータがコンシューマ（消費者）ならば super を利用する。
+* よくわからなかったので調べてみると分かりやすい記事があった。
+[境界ワイルドカード型をいつ使うか、どちらを使うか](https://relearn-java.com/generics/#i-34)
+>引数から値などを取り出す操作（Producer、get）だけを行う場合は<? extends T>を、引数に値を渡して格納したり処理させる操作（Consumer、put）だけを行う場合は<? super T>を、両方行う場合は境界ワイルドカード型は使わない
+
+>```java
+>public static<T> void copy(List<? extends T> from, List<? super >T> to) {
+>    to.put(from.get());
+>}
+>```
+
+* extends は上限を示し、super は下限を示す。
+
+```java
+// extends は E で指定した型を継承するクラスを渡せる。（E で指定した型を含む。）
+Stack<Number> stack = new Stack<>();
+// Number 型を継承する Integer 型のリストを渡せる。
+Iterable<Integer> pushList = new ArrayList<>();
+stack.pushAll(pushList);
+
+// super は E で指定した型の親クラスを渡せる。（E で指定した型を含む。）
+// E で指定した型を継承するクラスは渡せない。
+Stack<Number> stack = new Stack<>();
+// Number 型を継承する Integer 型のリストを渡せない。
+Iterable<Integer> popList = new ArrayList<>();
+stack.popAll(popList); // ← コンパイルエラー
+
+//これならできる。（Number は Object を継承するため。）
+Iterable<Object> popList = new ArrayList<>();
+stack.popAll(popList);
+```
 
 ## 項目32 ジェネリクスと可変長引数を注意して組み合わせる
 * 可変長パラメータを持つメソッドを作るなら、配列は使うな、ジェネリック型を使え。そしてメソッドには @SafeVarargs を付けろ。
@@ -501,3 +601,4 @@ List<E> test = new List<E>();
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
 * [【Effective Java】各項目のまとめ](https://www.thekingsmuseum.info/entry/2016/12/17/174236)
+* [境界ワイルドカード型をいつ使うか、どちらを使うか](https://relearn-java.com/generics/#i-34)
