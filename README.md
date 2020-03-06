@@ -488,6 +488,16 @@ List<E> test = new List<E>();
 ## 項目29 ジェネリック型を使う
 * todo
 
+## 項目32 ジェネリクスと可変長引数を注意して組み合わせる
+* 可変長パラメータを持つメソッドを作るなら、配列は使うな、ジェネリック型を使え。そしてメソッドには @SafeVarargs を付けろ。
+* そして、そもそも可変長パラメータは使わず List を渡せ。
+という理解でよいだろうか。。。
+ 
+```JAVA
+
+```
+
+
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
 * [【Effective Java】各項目のまとめ](https://www.thekingsmuseum.info/entry/2016/12/17/174236)
