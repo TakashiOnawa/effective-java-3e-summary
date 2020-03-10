@@ -626,7 +626,102 @@ public static void main(String[] args) {
     f.putFavorite(Integer.class, new Integer(1));
     f.putFavorite(Class.class, Favorites.class);
     String favoriteString = f.getFavorite(String.class);
-    System.out.pringf("%s", favoriteString); // ← Java
+    System.out.pringf("%s", favoriteString); // ← 「Java」と出力される。
+}
+```
+
+# 第 6 章 enum とアノテーション
+## 項目34 int 定数の代わりに enum を使う
+* int や String などの定数だと、型安全ではないため、間違った値を要れたとしてもコンパイルエラーにならない。
+* 定数固有メソッドの実装ができる。
+* enum.values() で定数の定義順に列挙できる。
+* コンパイル時に要素が分かっている定数の集合が必要な場合は enum を使う。
+
+```Java
+// 定数固定メソッドを持つ enum
+public enum Operation {
+    PLULS { public double apply(double x, double y) { return x + y; } },
+    MINUS { public double apply(double x, double y) { return x - y; } }
+
+    public abstract double apply(double x, double y);
+}
+
+// こんな感じにもできる。
+public enum Operation {
+    PLULS("+") { public double apply(double x, double y) { return x + y; } },
+    MINUS("-") { public double apply(double x, double y) { return x - y; } }
+
+    private final String symbol;
+
+    private Operation(String symbol) {
+        this.symbol = symbol;
+    }
+
+    @Override
+    public String toString() {
+        return symbol;
+    }
+
+    private static final Map<String, Operation> stringToEnum = Stream.of(values())
+        .collect(toMap(Object::toString, e -> e));
+
+    // 文字列を Operation に変換するようなメソッドも検討すると良い。
+    public static Optional<Operation> fromString(String symbol) {
+        // 下記の様にあらかじめ Map を作っておいても良いし、
+        // Values() でループして探しても良い。
+        return Optional.ofNullable(stringToEnum.get(symbol));
+    }
+
+    public abstract double apply(double x, double y);
+}
+
+// values() で定数の定義順に列挙できる。
+public static void main(String[] args) {
+    for (Operation op : Operation.values()) {
+        System.out.printf("%s", op.toString());
+    }
+}
+```
+
+enum の戦略パターン
+```Java
+enum PayrollDay {
+    // PayType が計算の戦略となる。
+    MONDAY(PayType.WEEKDAY),
+    TUESDAY(PayType.WEEKDAY),
+    WEDNESDAY(PayType.WEEKDAY),
+    THURSDAY(PayType.WEEKDAY),
+    FRIDAY(PayType.WEEKDAY),
+    SATURDAY(PayType.WEEKEND), // 週末
+    SUNDAY(PayType.WEEKEND); // 週末
+
+    private final Paytype payType;
+
+    private PayrollDay(PayType payType) { this.payType = payType; }
+
+    int pay(int minutesWorked, int payRate) {
+        return payType.pay(minutesWorked, payRate);
+    }
+
+    private enum PayType {
+        WEEKDAY {
+            int overtimePay(int minutesWorked, int payRate) {
+                // 平日用の残業計算
+            }
+        },
+        WEEKEND {
+            int overtimePay(int minutesWorked, int payRate) {
+                // 週末用の残業計算
+            }
+        };
+
+        abstract int overtimePay(int minutesWorked, int payRate);
+
+        int pay(int minutesWorked, int payRate) {
+            // 基本給 ＋ 残業代
+            return (minutesWorked * payRate) + overtimePay(minutesWorked, payRate);
+        }
+    }
 }
 ```
 
