@@ -725,6 +725,49 @@ enum PayrollDay {
 }
 ```
 
+## 項目35 序数の代わりにインスタンスフィールドを使う
+```Java
+// これはダメ
+enum Ensemble {
+    SOLO, // ordinal() = 0
+    DUET // ordinal() = 1
+
+    // ordinal() から動的に計算してはいけない。
+    int numberOfMusicians() { return ordinal() + 1; }
+}
+
+// これは良い
+enum Ensemble {
+    SOLO(1), // ordinal() = 0
+    DUET(2) // ordinal() = 1
+
+    // フィールドに持つ
+    private final int numberOfMusicians;
+    Ensemble(int size) { this.numberOfMusicians = size; }
+
+    int numberOfMusicians() { return numberOfMusicians; }
+}
+``` 
+
+## 項目36 ビットフィールドの代わりに EnumSet を使う
+```Java
+class Text {
+    public enum Style { BOLD, ITALIC, UNDERLINE }
+
+    // EnumSet<Style> 型の日k数でもいいけど、
+    // Set<Style> といった Interface にしておいた方が呼び出し側に自由度が生まれるから良い。（これは enum に限った話ではない。）
+    public void applyStyles(Set<Style> styles) {
+        // ・・・
+    }
+}
+
+public static void main(String[] args) {
+    Text text = new Text();
+    // こんな感じで EmumSet で複数渡せる。
+    text.applyStyles(EnumSet.of(BOLD, ITALIC));
+}
+```
+
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
 * [【Effective Java】各項目のまとめ](https://www.thekingsmuseum.info/entry/2016/12/17/174236)
