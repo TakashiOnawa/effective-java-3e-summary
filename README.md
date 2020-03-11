@@ -726,6 +726,7 @@ enum PayrollDay {
 ```
 
 ## 項目35 序数の代わりにインスタンスフィールドを使う
+* 序数というのは Enum.ordinal() で取得できるインデックスの事。
 ```Java
 // これはダメ
 enum Ensemble {
@@ -767,6 +768,29 @@ public static void main(String[] args) {
     text.applyStyles(EnumSet.of(BOLD, ITALIC));
 }
 ```
+
+## 項目37 序数インデックスの代わりに EnumMap を使う
+* Enum の値毎の Set を作りたいなら、Set の配列でインデックスに ordinal() を利用するのではなく、EnumMap を利用してキーに Enum を利用する。
+
+```Java
+class Plant {
+    enum LifeCycle { ANNUAL, PERENNIAL, BIEENNIAL }
+
+    final LifeCycle lifeCycle;
+}
+
+// 使い方
+MapM<Plant.LifeCycle, Set<Plant>> plantsByLifeCycle = new EnumMap<>(Plant.LifeCycle.class);
+
+for (Plant.LifeCycle lc : Plant.LifeCycle.values()) {
+    plantsByLifeCycle.put(lc, new HashSet<>());
+}
+for (Plant p : garden) {
+    plantsByLifeCycle.get(p.lifeCycle).add(p);
+}
+```
+
+
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
