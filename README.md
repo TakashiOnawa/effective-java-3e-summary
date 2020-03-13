@@ -790,6 +790,102 @@ for (Plant p : garden) {
 }
 ```
 
+## 拡張可能な enum をインターフェースで模倣する
+* enum を継承して enum を作ることはできないが、インターフェースを実装した enum を作ることで拡張できる。
+```Java
+public interface Operation {
+    double apply(double x, double y);
+}
+
+public enum BasicOperation implements Operation {
+    PLUS("+") {
+        public double apply(double x, double y) { return x + y; }
+    },
+    MINUS("-") {
+        public double apply(double x, double y) { return x - y; }
+    };
+
+    private final String symbol;
+    private BasicOperation(String symbol) {
+        this.symbol = symbol;
+    }
+}
+
+public enum ExtendedOperation implements Operation {
+    EXA("^") {
+        public double apply(double x, double y) { return Math.pow(x, y); }
+    };
+}
+```
+
+## 項目38 命名パターンよりもアノテーションを選ぶ
+* 例えばテストなどで、testXXX といった場合は、テストメソッドとして認識させるといった、命名規則で判断させることはせずに、@Test といったアノテーションを付けようよ、という話。
+```Java
+// 自作のアノテーションを作ることができる。
+public @interface MyTest {}
+
+// 自作アノテーションにアノテーションを付けることができる。
+@Retention(RetentionPolicy.RUNTIME)
+@Target(ElementType.METHOD)
+public @interface MyTest {}
+
+// こうやって使う
+public class Sample {
+    @MyTest
+    public void testXXX() { ... }
+}
+
+// アノテーションにメンバを持たせることもできる
+public @interface ExceptionTest {
+    Class<? extends Throwable> values();
+}
+
+// こうやって使う
+public class Sample {
+    @ExceptionTest({ IndexoutOfBoundsException.class,
+                     NullPointerException.class})
+    public void testXXX() { ... }
+}
+
+// こんな感じで処理できる。
+public class RunTests {
+    public static void main(String[] args) throws Exception {
+        Class<?> testClass = Class.forName(args[0]);
+        for (Method m : testClass.getDeclaredMethods()) {
+            // アノテーションがついている場合はメソッドを実行する。
+            if (m.isAnnotationPresent(ExceptiionTest.class)) {
+                try {
+                    m.invoke(null);
+                } catch (InvocationTargetException wrappedEx) {
+                    // 発生した例外の型を取ってきて、
+                    Throwable exc = wrappedEx.getCause();
+                    // アノテーションに指定した期待する例外の型を取ってきて
+                    Class<? extends Throwable> excType =
+                        m.getAnnotaion(ExceptionTest.class).value();
+                    // 発生した例外が期待する例外なら
+                    if (excType.isInstance(exc)) {
+                        // テストをパス
+                    }
+                }
+            }
+        }
+    }
+}
+```
+
+## 項目40 常に Override アノテーションを使う
+* オーバーライドしたいという意思が合って実装するならば、必ず @Override を付ける。そうしないとバグに気づかない恐れがある。
+```Java
+// equals メソッドをオーバーライドしよとしたときに、以下の様に実装してしまった場合は、
+// 間違った実装にもかかわらずコンパイルエラーは発生しない。
+// （equals は、パラメータが Object 型である必要がある。）
+public boolean equals(Sample s) { ... }
+
+// こうやって実装するとコンパイルエラーが発生するため間違いに気付ける。
+@Override
+public boolean equals(Sample s) { ... }
+```
+
 
 
 # 参考
