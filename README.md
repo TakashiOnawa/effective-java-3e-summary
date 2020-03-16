@@ -790,7 +790,7 @@ for (Plant p : garden) {
 }
 ```
 
-## 拡張可能な enum をインターフェースで模倣する
+## 38 拡張可能な enum をインターフェースで模倣する
 * enum を継承して enum を作ることはできないが、インターフェースを実装した enum を作ることで拡張できる。
 ```Java
 public interface Operation {
@@ -818,7 +818,7 @@ public enum ExtendedOperation implements Operation {
 }
 ```
 
-## 項目38 命名パターンよりもアノテーションを選ぶ
+## 項目39 命名パターンよりもアノテーションを選ぶ
 * 例えばテストなどで、testXXX といった場合は、テストメソッドとして認識させるといった、命名規則で判断させることはせずに、@Test といったアノテーションを付けようよ、という話。
 ```Java
 // 自作のアノテーションを作ることができる。
@@ -886,6 +886,24 @@ public boolean equals(Sample s) { ... }
 public boolean equals(Sample s) { ... }
 ```
 
+## 項目41 型を定義するためにマーカーインターフェースを使う
+* インターフェースを引数の型として使うことで、コンパイルの力を借りることができる。
+
+# 第 7 章 ラムダとストリーム
+
+## 項目42 無名クラスよりもラムダを選ぶ
+```Java
+// 無名クラス
+Collections.sort(words,
+    new Comparator<String>() {
+        public int compare(String s1, String s2) {
+            return Integer.compare(s1.length(), s2.length());
+        }
+    });
+
+// ラムダを使うと
+Collections.sort(words, (s1, s2) => Integer.compare(s1.length(), s2.length));
+```
 
 
 # 参考
