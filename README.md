@@ -892,6 +892,8 @@ public boolean equals(Sample s) { ... }
 # 第 7 章 ラムダとストリーム
 
 ## 項目42 無名クラスよりもラムダを選ぶ
+* 無名クラスよりもラムダの方が簡潔である。
+* ただし、ラムダでの計算が自明ではなかったり、計算が数行を超えたりする場合は使わない。1 行が理想。3 行が妥当。
 ```Java
 // 無名クラス
 Collections.sort(words,
@@ -905,6 +907,53 @@ Collections.sort(words,
 Collections.sort(words, (s1, s2) => Integer.compare(s1.length(), s2.length));
 ```
 
+## 項目43 ラムダよりもメソッド参照を選ぶ
+* メソッド参照の方がラムダよりも短く明瞭である場合はメソッド参照を使う。そうでない場合はラムダを使う。
+```Java
+// ラムダ
+map.merge(keym 1, (count, incr) -> count + incr);
+// メソッド参照
+map.merge(key, 1, Integer::sum);
+```
+
+## 項目44 標準の関数型インターフェースを使う
+* 基本的に、java.util.function.Function で提供されている標準の関数型インターフェースを利用する。
+* 独自の関数型インターフェースには場合は必ず @FunctionalInterface アノテーションを付ける。
+
+|インターフェース|関数のシグニチャ|例|説明|
+|---|---|---|---|
+|UnaryOperator<T>|T apply(T t)|String::toLowerCase|Tを受け取ってTを返す関数|
+|BinaryOperator<T>|T apply(T t1, T t2)|BigInteger::add|Tを2つ受け取ってTを返す関数|
+|Predicate<T>|boolean test(T t)|Collection::isEmpty|Tを受け取って判定する関数|
+|Function<T,R>|R apply(T t)|Arrays::asList|Tを受け取ってRを返す関数|
+|Supplier<T>|T get()|Instant::now|Tを返す。|
+|Consumer<T>|void accept(T t)|Sysmte.out::println|Tを受け取って処理する関数|
+※上記の他にも沢山ある。
+
+例）
+```Java
+UnaryOperator<String> op = s -> s.toUpperCase();
+System.out.println(op.apply("abc")); // ABC
+
+BinaryOperator<String> op = (s1, s2) -> s1 + s2;
+System.out.println(op.apply("abc", "def")); // abcdef
+
+Predicate<String> p = s -> s.isEmpty();
+System.out.println(p.test("abc")); // false
+System.out.println(p.test("")); // true
+
+Function<String, File> f = s -> new File("/tmp", s);
+File file = f.apply("test.txt");
+System.out.println(file); // /temp/test.txt
+
+Supplier<String> s = () -> "abc";
+System.out.println(s.get()); // abc
+
+Consumer<String> c = s -> System.out.println(s);
+c.accept("abc"); // abc
+```
+
+参考：http://www.ne.jp/asahi/hishidama/home/tech/java/functionalinterface.html#h_Consumer
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
