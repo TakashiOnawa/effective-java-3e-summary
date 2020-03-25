@@ -907,6 +907,39 @@ Collections.sort(words,
 Collections.sort(words, (s1, s2) => Integer.compare(s1.length(), s2.length));
 ```
 
+```Java
+public enum Operation {
+    PLUS("+") {
+        public double apply(double x, double y) { return x + y; }
+    },
+    MINUS("-") {
+        public double apply(double x, double y) { return x - y; }
+    };
+
+    private final String symbol;
+
+    Operation(String symbol) { this.symbol = symbol; }
+
+    public abstract double apply(double x, double y);
+}
+
+// 上記をラムダで書き換えると
+public enum Operation {
+    PLUS  ("+", (x, y) -> x + y),
+    MINUS ("-", (x, y) -> x - y);
+
+    private final String symbol;
+    private final DoubleBinaryOperator op; // 関数型インターフェース。項目 44 参照。
+
+    Operation(String symbol, DoubleBinaryOperator op) {
+        this.symbol = symbol;
+        this.op = op;
+    }
+
+    public double apply(double x, double y) { return op.applyAsDouble(x, y); }
+}
+```
+
 ## 項目43 ラムダよりもメソッド参照を選ぶ
 * メソッド参照の方がラムダよりも短く明瞭である場合はメソッド参照を使う。そうでない場合はラムダを使う。
 ```Java
@@ -954,6 +987,13 @@ c.accept("abc"); // abc
 ```
 
 参考：http://www.ne.jp/asahi/hishidama/home/tech/java/functionalinterface.html#h_Consumer
+
+## 項目45 ストリームを注意して使う
+* ストリームパイプラインは 0 個以上の中間操作と 1 つの終端操作から構成される。
+* ストリームパイプラインは終端操作で初めて実行される。（遅延評価）
+* **乱用すると読みづらくなるから注意すること!!**
+* ラムダのパラメータに適切な名前を付けたり、中間操作で適切に命名されたメソッドを利用したりして整理する。
+* ストリーム内では final な変数のみ利用できる。
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
