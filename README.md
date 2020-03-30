@@ -1,5 +1,5 @@
 # はじめに
-　Effective Java 第 3 版の個人的なまとめ。
+Effective Java 第 3 版の個人的なまとめ。
 
 # 第 2 章 オブジェクトの生成と消滅
 ## 項目1 コンストラクタの代わりに static ファクトリメソッドを適用する
@@ -994,6 +994,27 @@ c.accept("abc"); // abc
 * **乱用すると読みづらくなるから注意すること!!**
 * ラムダのパラメータに適切な名前を付けたり、中間操作で適切に命名されたメソッドを利用したりして整理する。
 * ストリーム内では final な変数のみ利用できる。
+
+## 項目46 ストリームで副作用のない関数を選ぶ
+* foreach 操作は、ストリームの計算結果を報告するためだけに使い、計算を行うために使うべきではない。
+```Java
+// これはダメ（foreach 内で freq の値を変えているため。）
+Map<String , Long> freq = new HashMap<>();
+try (Stream<String> words = new Scanner(file).tokens()) {
+    words.foreach(word -> {
+        freq.marge(word.toLowerCase(), 1L, Long::sum);
+    })
+}
+// これは良い
+Map<String, Long> freq;
+try (Stream<String> words = new Scanner(file).tokens()) {
+    freq = words.collect(groupingBy(String::toLowerCase, counting()));
+}
+```
+* その他、toSet, toMap, groupingBy, joining などのコレクターファクトリに関する使い方が記載されているが、読んでも頭に入ってこないから使いながら覚える。
+
+
+
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
