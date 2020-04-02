@@ -1013,7 +1013,51 @@ try (Stream<String> words = new Scanner(file).tokens()) {
 ```
 * その他、toSet, toMap, groupingBy, joining などのコレクターファクトリに関する使い方が記載されているが、読んでも頭に入ってこないから使いながら覚える。
 
+## 項目47 戻り値型として Stream よりも Collection を選ぶ
+* ループでしか使われないなら Iterable を返すべきだが、stream が使えないので、Collection やそのサブタイプを返すのが良い。
+* その他、メモリを節約するやり方が書いてあるけどよく分からない。。。
 
+## 項目48 ストリームを並列化するときは注意を払う
+* **計算の正しさを維持し**、パフォーマンス向上に値する十分な理由がない限り、ストリームパイプラインの並列化は試みない。
+* コードの正しさが維持さ
+れ、測定の結果がパフォーマンス向上を裏付けるなら利用する。
+```Java
+// 例：素数を数えるストリームパイプラインの並列化バージョン
+static logn pi(long n) {
+    return LongStream.rangeClosed(2, n)
+        .parallel() // 並列化のパイプライン
+        .mapToObj(BegInteger::valueOf)
+        .filter(i -> i.isProbablePrime(50))
+        .count();
+}
+```
+
+# 第 8 章 メソッド
+## 項目49 パラメータの正当性を検査する。
+* メソッドやコンストラクタを各場合、その都度、そのパラメータにどのような制約が存在するかを考え、チェックする。
+* null チェックや、範囲のチェックなど。
+* public と protected のメソッドに対してはチェックした後にスローする例外を @throws タグを使って文書化すること。
+* private なメソッドには assertion を利用できる。
+
+```Java
+// これで null の時に例外をスローしてくれる。
+this.strategy = Objects.requiredNonNull(strategy, "strategy");
+
+// その他に、checkFromIndexSize, checkFromToIndex, checkIndex などがある。
+```
+```Java
+// アサーションの使用例
+// java コマンドに -ea を指定しない限り assert は有効にならない。（コストも発生しない。）
+private static void sort(long a[], int offset, int length) {
+    assert a != null;
+    assert offset >= 0 && offset <= a.length;
+    assert length >= 0 && length <= a.length - offset;
+    // 計算を行う
+}
+```
+
+## 項目50 必要な場合、防御的にコピーする
+* 
 
 
 # 参考
