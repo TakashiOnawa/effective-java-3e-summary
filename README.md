@@ -1057,8 +1057,47 @@ private static void sort(long a[], int offset, int length) {
 ```
 
 ## 項目50 必要な場合、防御的にコピーする
-* 
+* 外からコンストラクタなどに渡されたインスタンス、外に公開するインスタンスはコピーすることでクラスを不変にする。
+```Java
+// ダメな例
+public final class Period {
+    private final Date start;
+    private final Date end;
 
+    public Period(Date start, Date end) {
+        this.start = start;
+        this.end = end;
+    }
+
+    public Date start() {
+        return start;
+    }
+}
+
+Date start = new Date();
+Date end = new Date();
+Pefiod p = new Period(start, end);
+end.setYear(78); // Period のインスタンスの内部を変えてしまう！
+p.start().setYear(78); // Period のインスタンスの内部を変えてしまう！
+
+// 良い例
+public final class Period {
+    private final Date start;
+    private final Date end;
+
+    public Period(Date start, Date end) {
+        this.start = new Date(start.getTime()); // コピーする。
+        this.end = new Date(end.getTime()); // コピーする。
+    }
+
+    public Date start() {
+        return nre Date(start.getTime()); // コピーする。
+    }
+}
+```
+
+* そもそも Date は使わずに、Instant、LocalDateTime、ZonedDateTime などの不変なクラスを利用する。
+* パフォーマンスを優先しなければならない場合、コピーすることが必ずしも正義ではない。値を変えないようドキュメンテーションで明確して対処する。
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
