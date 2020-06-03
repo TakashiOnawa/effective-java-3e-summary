@@ -1114,6 +1114,33 @@ public final class Period {
 * boolean の意味がメソッド名から明らかでなければ、boolean のパラメータよりも二つの要素を持つ enum 型を使う。
   * 引数に boolean を渡すときには、そのメソッド名から boolean の値が何を示すかがわかりづらいのであれば enum を渡すようにして分かりやすくする。
 
+## 項目51 オーバーロードを注意して使う
+* 安全で保守的な方針は、同じパラメータ数の二つのオーバーロードされたメソッドを提供しないこと。
+  * オーバーロードする代わりにメソッドには異なる名前をつける。
+  * 例えば、ObjectOutputStream には、writeBoolean()、writeInt()、writeLong() といったように異なるメソッド名になっている。
+  * コンストラクタをオーバーロードしたい場合には、メソッド名が付けられないため、代わりに static なファクトリメソッドを作ると良い。
+* 同じ引数位置で異なる関数型インターフェースを受け取るようにオーバーロードしてはいけない。
+
+```Java
+// うまく動かない例
+public static void main(String[] args) {
+    Collection<?>[] collections = {
+        new HashSet<String>(),
+        new ArrayList<BigInteger>(),
+        new HashMap<String, String>().values()
+    };
+
+    // 全部 classify(Collection<?> s) が呼び出される。
+    for (Collections<?> c : collections) {
+        System.out.println(classify(c));
+    }
+}
+
+// オーバーロード
+public static String classify(Set<?> s)
+public static String classify(List<?> s)
+public static String classify(Collection<?> s)
+```
 
 
 # 参考
