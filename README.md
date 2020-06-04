@@ -1142,6 +1142,34 @@ public static String classify(List<?> s)
 public static String classify(Collection<?> s)
 ```
 
+## 項目53 可変長引数を注意して使う
+* 可変長引数が 1 つ以上必要な場合には、可変長引数だけではなく、一つ目の引数に必須の引数を置き、二つ目の引数に可変長引数を置くこと。
+```Java
+// 最小値を求めるには 1 つ以上の要素が必要になるので以下のようにする。
+static int min(int firstArg, int... remainingArgs) {
+    int min = firstArg;
+    for (int arg : remainingArgs) {
+        if (arg < min) {
+            min = arg;
+        }
+    }
+    return min;
+}
+```
+
+* 可変長引数は毎回配列を割り当てて初期化するのでコストが高い。そこのコストが受け入れられない場合は、多くのパターンを救える数の引数を固定で定義し、その後に可変長引数を置く。
+```Java
+// 例えば、 95 % が 3 個以下のパラメータが渡されることが分かっているなら、以下のようにする。
+public void foo() {}
+public void foo(int a1) {}
+public void foo(int a1, int a2) {}
+public void foo(int a1, int a2, int a3) {}
+public void foo(int a1, int a2, int a3, int... rest) {}
+```
+
+## 項目54 null ではなく、空のコレクションか空配列を返す
+* null を返すと使う側が null チェックしなければならず複雑になるから。
+
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
