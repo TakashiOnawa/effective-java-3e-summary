@@ -1170,6 +1170,20 @@ public void foo(int a1, int a2, int a3, int... rest) {}
 ## 項目54 null ではなく、空のコレクションか空配列を返す
 * null を返すと使う側が null チェックしなければならず複雑になるから。
 
+## 項目55 オプショナルを注意して返す
+* null を返す可能性があるメソッドは Optional を返すことで呼び出し元に null チェックを強制できる。
+* コレクション、ストリーム、マップ、配列、オプショナルを含むコンテナ型をオプショナルで包むべきではない。（例えば Optional<List<T>> を返すなら List<T> を返すべきである。）
+* ボクシングされた基本型のオプショナルを返すべきではない。返すなら OptionalInt、OptionalLong、OptionalDouble などを利用する。
+* マップのキーに Optional を利用してはならない。
+* Optional は少なからずコストがかかるので、パフォーマンスが重要なメソッドは null を返すか例外をスローするのが良い。
++ 戻り値以外で Optional を使うのは稀である。
+
+```Java
+orElse(デフォルト値) // null なら指定されたデフォルト値を返す。
+orElseThrow(例外::new) // null なら指定された例外をスローする。
+get() // 値があると分かっている時に使う。null なら NoSuchElementException がスローされる。
+map(h -> h.getXXX()).orElse(デフォルト値) // null なら指定されたデフォルト値を返却し、null でなければ map で変換した値を返す。
+```
 
 # 参考
 * [jbloch/effective-java-3e-source-code](https://github.com/jbloch/effective-java-3e-source-code)
